@@ -38,8 +38,8 @@
 #include <ctype.h>
 #include <avr/pgmspace.h>
 #include "aJSON.h"
-#include "utility/streamhelper.h"
-#include "utility/stringbuffer.h"
+#include "streamhelper.h"
+#include "stringbuffer.h"
 
 /******************************************************************************
  * Definitions
@@ -176,6 +176,17 @@ aJsonClass::printInt(aJsonObject *item, FILE* stream)
   if (item != NULL)
     {
       return fprintf_P(stream, PSTR("%d"), item->valueint);
+    }
+  //printing nothing is ok
+  return 0;
+}
+
+int
+aJsonClass::printUint16(aJsonObject *item, FILE* stream)
+{
+  if (item != NULL)
+    {
+      return fprintf_P(stream, PSTR("%u"), item->valueuint16_t);
     }
   //printing nothing is ok
   return 0;
@@ -589,6 +600,9 @@ aJsonClass::printValue(aJsonObject *item, FILE* stream)
     break;
   case aJson_Int:
     result = printInt(item, stream);
+    break;
+  case aJson_Uint16_t:
+    result = printUint16(item, stream);
     break;
   case aJson_Float:
     result = printFloat(item, stream);
@@ -1055,6 +1069,18 @@ aJsonClass::createItem(double num)
 }
 
 aJsonObject*
+aJsonClass::createItem(uint16_t num)
+{
+  aJsonObject *item = newItem();
+  if (item)
+    {
+      item->type = aJson_Uint16_t;
+      item->valueuint16_t = num;
+    }
+  return item;
+}
+
+aJsonObject*
 aJsonClass::createItem(const char *string)
 {
   aJsonObject *item = newItem();
@@ -1178,6 +1204,12 @@ aJsonClass::addNumberToObject(aJsonObject* object, const char* name, int n)
 
 void
 aJsonClass::addNumberToObject(aJsonObject* object, const char* name, double n)
+{
+  addItemToObject(object, name, createItem(n));
+}
+
+void
+aJsonClass::addNumberToObject(aJsonObject* object, const char* name, uint16_t n)
 {
   addItemToObject(object, name, createItem(n));
 }
